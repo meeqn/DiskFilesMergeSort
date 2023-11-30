@@ -1,16 +1,16 @@
 package org.DFMS;
 
-import org.DFMS.Data.Buffering.DistributionTape;
-import org.DFMS.Data.Buffering.Tape;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
 public class Main {
+
+    private static void clearStartTapes(Tape t1, Tape t2){
+        t1.clearTapeFile();
+        t2.clearTapeFile();
+    }
     private static void sortFile(DistributionTape t3, Tape t1, Tape t2){
-        t3.splitTape(t1, t2);
+        t3.splitBetweenTapes();
+        Tape.mergeTapes(t3, t1, t2);
+        //TODO loop it and add checking if after splitting t2 is empty
+        //TODO add printing contents of tapes after phases
     }
     public static void main(String[] args) {
         String filesDir = "src/main/resources/";
@@ -20,8 +20,10 @@ public class Main {
 
         Tape t1 = new Tape(t1FilePath);
         Tape t2 = new Tape(t2FilePath);
+        clearStartTapes(t1, t2);
+
         DistributionTape t3 = new DistributionTape(t3FilePath, t1, t2);
-        //t3.fillRandomly();
+//        t3.fillRandomly(); // uncomment if you're not passing pre-made file
         sortFile(t3, t1, t2);
     }
 }

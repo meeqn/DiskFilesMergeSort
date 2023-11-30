@@ -1,12 +1,7 @@
 package org.DFMS.Data.Buffering;
 
 import org.DFMS.Data.Buffering.Storing.Record;
-
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.LinkedList;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
 
 public class Buffer {
     public static final int BUFFER_SIZE = 10; //number of records fitting in buffer

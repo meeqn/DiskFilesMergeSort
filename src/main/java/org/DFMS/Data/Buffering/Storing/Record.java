@@ -21,9 +21,11 @@ public class Record implements Comparable<Record>{
         }
         return tmpSortVal;
     }
-
     @Override
     public int compareTo(Record o) {
+        if(o == null){
+            return 1;
+        }
         return this.val.compareTo(o.getVal());
     }
 }
