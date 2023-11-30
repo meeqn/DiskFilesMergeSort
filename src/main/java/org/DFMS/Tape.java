@@ -37,7 +37,9 @@ public class Tape {
     }
 
     //post-sorting method for flushing records remaining in destTape buffer, clears other tapes
-    private static void postSort(Tape destTape, Tape sourceTape1, Tape sourceTape2){
+    private static void postSort(Tape destTape, Tape sourceTape1, Tape sourceTape2, Scanner t1Stream, Scanner t2Stream){
+        t1Stream.close();
+        t2Stream.close();
         destTape.loadBufferToFile();
         sourceTape1.clearTapeFile();
         sourceTape2.clearTapeFile();
@@ -46,51 +48,71 @@ public class Tape {
         try {
             Scanner t1Stream = new Scanner(new File(t1.filePath));
             Scanner t2Stream = new Scanner(new File(t2.filePath));
+            boolean t1Blocked = false;
+            boolean t2Blocked = false;
 
             Record lastPushed = null;
+            Record lastPushedT1 = null;
+            Record lastPushedT2 = null;
+
             Record currPushedT1 = t1.getNextRecord(t1Stream);
             Record currPushedT2 = t2.getNextRecord(t2Stream);
+
             while(true){
-                if(currPushedT1 != null && currPushedT2 != null){
-                    if(currPushedT1.compareTo(lastPushed)>=0 && currPushedT2.compareTo(lastPushed)>=0){
+                if(currPushedT1 != null && currPushedT2 != null){ //both tapes are not empty
+                    //current record breaks the run on t1
+                    if(currPushedT1.compareTo(lastPushedT1)<0 || currPushedT1.compareTo(lastPushed)<0){
+                        t1Blocked=true;
+                    }
+                    //current record breaks the run on t2
+                    if(currPushedT2.compareTo(lastPushedT2)<0 || currPushedT2.compareTo(lastPushed)<0){
+                        t2Blocked=true;
+                    }
+
+                    if(!t1Blocked && !t2Blocked){ //both tapes can still contribute to current run
                         lastPushed = getSmaller(currPushedT1, currPushedT2);
                         destTape.putNextRecord(lastPushed);
                     }
-                    else if(currPushedT1.compareTo(lastPushed)>=0){
+                    else if(!t1Blocked){ //t1 can still contribute to current run
                         lastPushed = currPushedT1;
                         destTape.putNextRecord(lastPushed);
                     }
-                    else if(currPushedT2.compareTo(lastPushed)>=0){
+                    else if(!t2Blocked){ //t2 can still contribute to current run
                         lastPushed = currPushedT2;
                         destTape.putNextRecord(lastPushed);
                     }
-                    else{
-                        lastPushed=null;
+                    else{ //both tapes start contributing to current run
+                        lastPushed = null;
+                        lastPushedT1 = null;
+                        lastPushedT2 = null;
+                        t1Blocked = false;
+                        t2Blocked = false;
+                    }
+
+                    if(lastPushed == currPushedT1){
+                        lastPushedT1 = lastPushed;
+                        currPushedT1 = t1.getNextRecord(t1Stream);
+                    }
+                    else if(lastPushed == currPushedT2){
+                        lastPushedT2 = lastPushed;
+                        currPushedT2 = t2.getNextRecord(t2Stream);
                     }
                 }
-                else if(currPushedT1 != null){
+                else if(currPushedT1 != null){ //only tape1 is not empty
                     lastPushed = currPushedT1;
                     destTape.putNextRecord(lastPushed);
-                }
-                else if(currPushedT2 != null){
-                    lastPushed = currPushedT2;
-                    destTape.putNextRecord(lastPushed);
-                }
-                else{
-                    break;
-                }
-                if(lastPushed == currPushedT1){
                     currPushedT1 = t1.getNextRecord(t1Stream);
                 }
-                else if(lastPushed == currPushedT2){
+                else if(currPushedT2 != null){ //only tape2 is not empty
+                    lastPushed = currPushedT2;
+                    destTape.putNextRecord(lastPushed);
                     currPushedT2 = t2.getNextRecord(t2Stream);
                 }
-
+                else{ //both tapes are empty
+                    break;
+                }
             }
-
-            t1Stream.close();
-            t2Stream.close();
-            postSort(destTape, t1, t2);
+            postSort(destTape, t1, t2, t1Stream, t2Stream);
         }
         catch (FileNotFoundException e) {
             throw new RuntimeException(e);
