@@ -3,6 +3,7 @@ package org.DFMS;
 import lombok.Getter;
 import org.DFMS.Data.Buffering.Buffer;
 import org.DFMS.Data.Buffering.Storing.Record;
+import org.DFMS.Experimenting.ReportListener;
 
 import java.io.*;
 import java.util.Random;
@@ -16,15 +17,16 @@ public class Tape {
     private final String filePath;
     @Getter
     protected Buffer buffer;
-    private static final int SCALE_FACTOR = 2; //how many buffers to fill the tape
-    private static final int TAPE_SIZE = Buffer.BUFFER_SIZE * SCALE_FACTOR;
-    public Tape(String path){
+    public ReportListener repListener;
+    public Tape(String path, ReportListener repListener){
         this.filePath = path;
+        this.repListener = repListener;
         this.buffer = new Buffer();
     }
     public void loadBufferToFile(){
         try (BufferedWriter file_stream = new BufferedWriter(new FileWriter(this.getFilePath(), true))) {
             int recordValue;
+            this.repListener.incWrites();
             while(!this.buffer.isEmpty()){
                 recordValue = this.buffer.popFirstRecord().getVal();
                 file_stream.write(Integer.toString(recordValue));
@@ -40,11 +42,13 @@ public class Tape {
     private static void postSort(Tape destTape, Tape sourceTape1, Tape sourceTape2, Scanner t1Stream, Scanner t2Stream){
         t1Stream.close();
         t2Stream.close();
-        destTape.loadBufferToFile();
+        if(!destTape.buffer.isEmpty()) {
+            destTape.loadBufferToFile();
+        }
         sourceTape1.clearTapeFile();
         sourceTape2.clearTapeFile();
     }
-    public static void mergeTapes(Tape destTape, Tape t1, Tape t2){
+    public static void mergeTapes(DistributionTape destTape, Tape t1, Tape t2){
         try {
             Scanner t1Stream = new Scanner(new File(t1.filePath));
             Scanner t2Stream = new Scanner(new File(t2.filePath));
@@ -57,16 +61,18 @@ public class Tape {
 
             Record currPushedT1 = t1.getNextRecord(t1Stream);
             Record currPushedT2 = t2.getNextRecord(t2Stream);
-
+            destTape.setTwoSeriesMerge(true);
             while(true){
                 if(currPushedT1 != null && currPushedT2 != null){ //both tapes are not empty
                     //current record breaks the run on t1
-                    if(currPushedT1.compareTo(lastPushedT1)<0 || currPushedT1.compareTo(lastPushed)<0){
+                    if(currPushedT1.compareTo(lastPushedT1)<0){
                         t1Blocked=true;
+                        destTape.setTwoSeriesMerge(false);
                     }
                     //current record breaks the run on t2
-                    if(currPushedT2.compareTo(lastPushedT2)<0 || currPushedT2.compareTo(lastPushed)<0){
+                    if(currPushedT2.compareTo(lastPushedT2)<0){
                         t2Blocked=true;
+                        destTape.setTwoSeriesMerge(false);
                     }
 
                     if(!t1Blocked && !t2Blocked){ //both tapes can still contribute to current run
@@ -135,6 +141,7 @@ public class Tape {
             if(this.buffer.isEmpty()){
                 return null;
             }
+            repListener.incReads();
         }
         return this.buffer.popFirstRecord();
     }
@@ -149,24 +156,21 @@ public class Tape {
             this.buffer.pushNextRecord(new Record(filestream.nextInt()));
         }
     }
-    public void fillRandomly(){
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            Random random = new Random();
-            for (int i = 0; i < TAPE_SIZE; i++) {
-                int num = random.nextInt(100);
-                writer.write(Integer.toString(num));
-                if( i<TAPE_SIZE - 1)
-                    writer.write(" ");
+
+    public void printTapeContents(){
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader(this.filePath));
+            String line;
+            while ((line = br.readLine()) != null) {
+                System.out.println(line);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-    public void fillManually(){
-        //TODO
-    }
     public void clearTapeFile(){
-        try (FileWriter writer = new FileWriter(this.getFilePath());){
+        try (FileWriter writer = new FileWriter(this.getFilePath())){
             writer.write("");
         } catch (IOException e) {
             throw new RuntimeException(e);

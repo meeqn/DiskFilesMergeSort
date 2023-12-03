@@ -13,7 +13,7 @@ public class Record implements Comparable<Record>{
         this.sortVal = this.calculateSortVal();
     }
     private Integer calculateSortVal(){
-        int tmpSortVal = 1;
+        int tmpSortVal = this.val + 1;
         for(int i=2; i<this.val; i++){
             if(this.val%i==0){
                 tmpSortVal += i;
@@ -27,5 +27,6 @@ public class Record implements Comparable<Record>{
             return 1;
         }
         return this.val.compareTo(o.getVal());
+//        return this.sortVal.compareTo(o.getSortVal());
     }
 }
