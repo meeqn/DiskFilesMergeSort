@@ -3,6 +3,10 @@ package org.DFMS.Experimenting;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.DFMS.Data.Buffering.Buffer;
+
+import static java.lang.Math.ceil;
+import static java.lang.Math.log;
 
 public class ReportListener {
     @Getter
@@ -33,8 +37,12 @@ public class ReportListener {
         this.writes+=1;
     }
     public void printStats(){
+        int theoreticalMaxPhases = (int)(ceil(log(this.getRunsAmount())/log(2)));
+        int theoreticalMaxReadWrite = 4 * theoreticalMaxPhases * this.getRecordsAmount() / Buffer.BUFFER_SIZE;
         System.out.println("phases: " + this.getPhases());
-        System.out.println("reads/writes: " + this.getReads() + "/" + this.getWrites() );
+        System.out.println("reads/writes: " + this.getReads() + "/" + this.getWrites() + " combined: " + (this.getReads()+this.getWrites()));
         System.out.println(this.getRecordsAmount() + " records in " + this.getRunsAmount() + " initial runs");
+        System.out.println("theoretical max phases: " + theoreticalMaxPhases);
+        System.out.println("theoretical max reads/writes: " + theoreticalMaxReadWrite);
     }
 }

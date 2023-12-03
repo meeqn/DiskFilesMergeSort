@@ -1,7 +1,6 @@
 package org.DFMS;
 
 import org.DFMS.Experimenting.ReportListener;
-
 public class Main {
 
     private static void clearStartTapes(Tape t1, Tape t2){
@@ -50,7 +49,9 @@ public class Main {
                 new ReportListener(80),
                 new ReportListener(320),
                 new ReportListener(1280),
-                new ReportListener(4960)
+                new ReportListener(4960),
+                new ReportListener(19840),
+                new ReportListener(79360)
         };
         for(int i=0; i< reportListeners.length; i++){
             t1 = new Tape(t1FilePath, reportListeners[i]);

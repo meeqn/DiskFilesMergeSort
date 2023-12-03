@@ -67,7 +67,7 @@ public class DistributionTape extends Tape {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.getFilePath()))) {
             Random random = new Random();
             for (int i = 0; i < recordsAmount; i++) {
-                int num = random.nextInt(100);
+                int num = random.nextInt(100000);
                 if(i>0 && num<prevNum){
                     runsAmount+=1;
                 }
