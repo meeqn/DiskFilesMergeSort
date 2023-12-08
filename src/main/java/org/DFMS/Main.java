@@ -45,13 +45,13 @@ public class Main {
         Tape t2;
         DistributionTape t3;
         ReportListener[] reportListeners = {
-                new ReportListener(20),
-                new ReportListener(80),
-                new ReportListener(320),
-                new ReportListener(1280),
-                new ReportListener(4960),
-                new ReportListener(19840),
-                new ReportListener(79360)
+//                new ReportListener(20),
+                new ReportListener(12)
+//                ,new ReportListener(320),
+//                new ReportListener(1280),
+//                new ReportListener(4960),
+//                new ReportListener(19840),
+//                new ReportListener(79360)
         };
         for(int i=0; i< reportListeners.length; i++){
             t1 = new Tape(t1FilePath, reportListeners[i]);
@@ -62,7 +62,7 @@ public class Main {
 //          runsAmount = t3.fillManually();
             runsAmount = t3.fillRandomly(reportListeners[i].getRecordsAmount());
             reportListeners[i].setRunsAmount(runsAmount);
-            sortFile(reportListeners[i], t3, t1, t2, false);
+            sortFile(reportListeners[i], t3, t1, t2, true);
         }
     }
 }

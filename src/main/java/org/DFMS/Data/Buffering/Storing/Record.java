@@ -26,7 +26,7 @@ public class Record implements Comparable<Record>{
         if(o == null){
             return 1;
         }
-//        return this.val.compareTo(o.getVal());
-        return this.sortVal.compareTo(o.getSortVal());
+        return this.val.compareTo(o.getVal());
+//        return this.sortVal.compareTo(o.getSortVal());
     }
 }

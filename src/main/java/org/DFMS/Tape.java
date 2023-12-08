@@ -105,11 +105,17 @@ public class Tape {
                     }
                 }
                 else if(currPushedT1 != null){ //only tape1 is not empty
+                    if(currPushedT1.compareTo(lastPushedT1)<0){
+                        destTape.setTwoSeriesMerge(false);
+                    }
                     lastPushed = currPushedT1;
                     destTape.putNextRecord(lastPushed);
                     currPushedT1 = t1.getNextRecord(t1Stream);
                 }
                 else if(currPushedT2 != null){ //only tape2 is not empty
+                    if(currPushedT2.compareTo(lastPushedT2)<0){
+                        destTape.setTwoSeriesMerge(false);
+                    }
                     lastPushed = currPushedT2;
                     destTape.putNextRecord(lastPushed);
                     currPushedT2 = t2.getNextRecord(t2Stream);
